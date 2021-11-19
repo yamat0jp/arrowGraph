@@ -18,6 +18,7 @@ type
     prev, next: TMyData;
     dash: Boolean;
     time: integer;
+    constructor Create;
   end;
 
   TMyData = class
@@ -43,10 +44,15 @@ type
     N3: TMenuItem;
     dummyArrow1: TMenuItem;
     inputData: TAction;
-    inputData1: TMenuItem;
     back: TAction;
     N4: TMenuItem;
     back1: TMenuItem;
+    calcurate: TAction;
+    execApp: TAction;
+    inputData1: TMenuItem;
+    calcurate2: TMenuItem;
+    N5: TMenuItem;
+    execApp1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -59,6 +65,8 @@ type
     procedure dummyArrow1Click(Sender: TObject);
     procedure inputDataExecute(Sender: TObject);
     procedure backExecute(Sender: TObject);
+    procedure calcurateExecute(Sender: TObject);
+    procedure execAppExecute(Sender: TObject);
   private
     { Private êÈåæ }
     list: TList<TMyData>;
@@ -68,10 +76,13 @@ type
     dragitem: TMyData;
     starting, stopping: TMyData;
     dummy: Boolean;
+    complete: Boolean;
     function checkClick(X, Y: integer): Boolean;
     function createBox(X, Y: integer): TMyData;
     procedure addLine(prev, next: TMyData);
     function isError: Boolean;
+    function getTime(prev, next: TMyData): integer;
+    procedure setTime(obj: TMyData; reverse: Boolean);
   public
     { Public êÈåæ }
   end;
@@ -84,6 +95,31 @@ implementation
 {$R *.dfm}
 
 uses OKCANCL2;
+
+procedure TForm1.setTime(obj: TMyData; reverse: Boolean);
+var
+  s: TMyData;
+  i: integer;
+begin
+  if reverse = false then
+    for s in obj.next do
+    begin
+      i := getTime(obj, s) + obj.data1;
+      if s.data1 < i then
+        s.data1 := i;
+      if stopping <> s then
+        setTime(s, reverse);
+    end
+  else
+    for s in obj.prev do
+    begin
+      i := obj.data2 - getTime(s, obj);
+      if (s.data2 = -1) or (s.data2 > i) then
+        s.data2 := i;
+      if starting <> s then
+        setTime(s, reverse);
+    end;
+end;
 
 procedure TForm1.startExecute(Sender: TObject);
 begin
@@ -102,7 +138,9 @@ procedure TForm1.addLine(prev, next: TMyData);
 var
   obj: TMyLine;
 begin
-  if prev.next.IndexOf(next) > -1 then
+  if (prev.next.IndexOf(next) > -1)or(next.prev.IndexOf(prev) > -1) then
+    Exit;
+  if (dummy = true) and ((prev = starting) or (next = stopping)) then
     Exit;
   obj := TMyLine.Create;
   list2.Add(obj);
@@ -114,6 +152,7 @@ begin
   if dummy = true then
   begin
     obj.dash := true;
+    obj.time := 0;
     dummyArrow1.Click;
   end;
   prev.next.Add(next);
@@ -123,31 +162,59 @@ end;
 procedure TForm1.backExecute(Sender: TObject);
 var
   obj: TObject;
-  s, t: TMyData;
+  s, prev, next: TMyData;
+  line: TMyLine;
   i: integer;
 begin
   obj := stack.Pop;
   if obj is TMyLine then
   begin
-    list2.Delete(list2.IndexOf(obj as TMyLine));
+    line := obj as TMyLine;
+    list2.Delete(list2.IndexOf(line));
+    prev := line.prev;
+    next := line.next;
+    i := prev.next.IndexOf(next);
+    prev.next.Delete(i);
+    i := next.prev.IndexOf(prev);
+    next.prev.Delete(i);
     obj.Free;
   end
   else if obj is TMyData then
   begin
     s := obj as TMyData;
     list.Delete(list.IndexOf(s));
-    for t in s.prev do
+    for prev in s.prev do
     begin
-      i := t.next.IndexOf(s);
-      t.next.Delete(i);
+      i := prev.next.IndexOf(s);
+      prev.next.Delete(i);
     end;
-    for t in s.next do
+    for next in s.next do
     begin
-      i := t.prev.IndexOf(s);
-      t.prev.Delete(i);
+      i := next.prev.IndexOf(s);
+      next.prev.Delete(i);
     end;
     obj.Free;
   end;
+  PaintBox1Paint(Sender);
+end;
+
+procedure TForm1.calcurateExecute(Sender: TObject);
+var
+  s: TMyData;
+begin
+  for s in list do
+  begin
+    s.data1 := -1;
+    s.data2 := -1;
+    s.data3 := -1;
+  end;
+  starting.data1 := 0;
+  setTime(starting, false);
+  stopping.data2 := stopping.data1;
+  setTime(stopping, true);
+  for s in list do
+    s.data3 := s.data2 - s.data1;
+  complete := true;
   PaintBox1Paint(Sender);
 end;
 
@@ -218,6 +285,16 @@ begin
   stack.Free;
 end;
 
+function TForm1.getTime(prev, next: TMyData): integer;
+var
+  s: TMyLine;
+begin
+  result := 0;
+  for s in list2 do
+    if (s.prev = prev) and (s.next = next) then
+      result := s.time;
+end;
+
 procedure TForm1.checkRootExecute(Sender: TObject);
 var
   item, s: TMyData;
@@ -263,10 +340,15 @@ begin
   dummy := dummyArrow1.Checked;
 end;
 
+procedure TForm1.execAppExecute(Sender: TObject);
+begin
+  checkRootExecute(Sender);
+  inputDataExecute(Sender);
+  calcurateExecute(Sender);
+end;
+
 procedure TForm1.PaintBox1DragOver(Sender, Source: TObject; X, Y: integer;
   State: TDragState; var Accept: Boolean);
-var
-  item: TMyData;
 begin
   case State of
     TDragState.dsDragEnter:
@@ -285,11 +367,8 @@ begin
           addLine(dragitem, active);
         end
         else if (starting.left + 50 < X) and (X < stopping.left - 50) and
-          (50 < Y) and (Y < ClientHeight - 50) then
-        begin
-          item := createBox(X, Y);
-          addLine(dragitem, item);
-        end;
+          (50 < Y) and (Y < ClientHeight - 50) and (dummy = false) then
+          addLine(dragitem, createBox(X, Y));
         dragitem.color := clBlack;
         PaintBox1Paint(Sender);
       end;
@@ -327,9 +406,15 @@ begin
         item.top + item.Length);
       Font.color := clGreen;
       Font.Size := 13;
-      TextOut(item.left + 8, item.top + 8, item.id);
+      X := item.left + 8;
+      Y := item.top + 8;
+      TextOut(X, Y, item.id);
+      TextOut(X, Y + 25, item.data1.ToString);
+      TextOut(X, Y + 50, item.data2.ToString);
+      if item.data3 = 0 then
+        Font.color := clRed;
+      TextOut(X, Y + 75, string.Format('(%d)', [item.data3]));
     end;
-  PaintBox1.Canvas.Pen.color := clBlack;
   PaintBox1.Canvas.Font.color := clBlue;
   for obj in list2 do
     with PaintBox1.Canvas do
@@ -338,9 +423,14 @@ begin
         Pen.Style := psDash
       else
         Pen.Style := psSolid;
+      if (complete = true) and (obj.prev.data3 = 0) and (obj.next.data3 = 0)
+      then
+        Pen.color := clRed
+      else
+        Pen.color := clBlack;
       MoveTo(obj.start.X, obj.start.Y);
       LineTo(obj.endPoint.X, obj.endPoint.Y);
-      if obj.time > 0 then
+      if obj.time <> -1 then
       begin
         X := obj.start.X + obj.endPoint.X;
         Y := obj.start.Y + obj.endPoint.Y;
@@ -364,6 +454,13 @@ begin
   prev.Free;
   next.Free;
   inherited;
+end;
+
+{ TMyLine }
+
+constructor TMyLine.Create;
+begin
+  time := -1;
 end;
 
 end.

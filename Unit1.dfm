@@ -5,7 +5,7 @@ object Form1: TForm1
   Caption = 'Form1'
   ClientHeight = 613
   ClientWidth = 846
-  Color = clBtnFace
+  Color = clMoneyGreen
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -42,6 +42,15 @@ object Form1: TForm1
       end
       object inputData1: TMenuItem
         Action = inputData
+      end
+      object calcurate2: TMenuItem
+        Action = calcurate
+      end
+      object N5: TMenuItem
+        Caption = '-'
+      end
+      object execApp1: TMenuItem
+        Action = execApp
       end
     end
     object N3: TMenuItem
@@ -82,6 +91,16 @@ object Form1: TForm1
       Category = #26360#24335
       Caption = 'back'
       OnExecute = backExecute
+    end
+    object calcurate: TAction
+      Category = #23455#34892
+      Caption = 'calcurate'
+      OnExecute = calcurateExecute
+    end
+    object execApp: TAction
+      Category = #23455#34892
+      Caption = 'execApp'
+      OnExecute = execAppExecute
     end
   end
 end
