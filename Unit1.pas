@@ -17,6 +17,7 @@ type
     endPoint: TPoint;
     prev, next: TMyData;
     dash: Boolean;
+    time: integer;
   end;
 
   TMyData = class
@@ -41,6 +42,8 @@ type
     N2: TMenuItem;
     N3: TMenuItem;
     dummyArrow1: TMenuItem;
+    inputData: TAction;
+    inputData1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -51,6 +54,7 @@ type
     procedure startExecute(Sender: TObject);
     procedure checkRootExecute(Sender: TObject);
     procedure dummyArrow1Click(Sender: TObject);
+    procedure inputDataExecute(Sender: TObject);
   private
     { Private êÈåæ }
     list: TList<TMyData>;
@@ -73,6 +77,8 @@ var
 implementation
 
 {$R *.dfm}
+
+uses OKCANCL2;
 
 procedure TForm1.startExecute(Sender: TObject);
 begin
@@ -123,15 +129,35 @@ begin
     end;
 end;
 
+procedure TForm1.inputDataExecute(Sender: TObject);
+var
+  obj: TMyLine;
+  s: string;
+  i: integer;
+begin
+  OKRightDlg.ValueListEditor1.Strings.Clear;
+  for obj in list2 do
+    if obj.dash = false then
+    begin
+      s := obj.prev.id + ' --> ' + obj.next.id + '=';
+      OKRightDlg.ValueListEditor1.Strings.AddObject(s, obj);
+    end;
+  if OKRightDlg.ShowModal = mrOK then
+    with OKRightDlg.ValueListEditor1.Strings do
+      for i := 0 to Count - 1 do
+        TMyLine(Objects[i]).time := ValueFromIndex[i].ToInteger;
+  PaintBox1Paint(Sender);
+end;
+
 function TForm1.isError: Boolean;
 var
   s: TMyData;
 begin
-  result:=list2.Count=0;
+  result := list2.Count = 0;
   for s in list do
     if (s <> starting) and (s <> stopping) then
-      if (s.prev.Count = 0)or(s.next.Count = 0) then
-        result:=true;
+      if (s.prev.Count = 0) or (s.next.Count = 0) then
+        result := true;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -171,7 +197,7 @@ begin
       item.id := c;
       c := Succ(c);
       for s in item.next do
-        if (s <> stopping) and (s.id = #0) and(ls.IndexOf(s) = -1) then
+        if (s <> stopping) and (s.id = #0) and (ls.IndexOf(s) = -1) then
           ls.Add(s);
       ls.Delete(0);
     end;
@@ -252,6 +278,7 @@ procedure TForm1.PaintBox1Paint(Sender: TObject);
 var
   obj: TMyLine;
   item: TMyData;
+  X, Y: integer;
 begin
   Canvas.FillRect(ClientRect);
   for item in list do
@@ -265,6 +292,7 @@ begin
       TextOut(item.left + 8, item.top + 8, item.id);
     end;
   PaintBox1.Canvas.Pen.color := clBlack;
+  PaintBox1.Canvas.Font.Color:=clBlue;
   for obj in list2 do
     with PaintBox1.Canvas do
     begin
@@ -274,6 +302,12 @@ begin
         Pen.Style := psSolid;
       MoveTo(obj.start.X, obj.start.Y);
       LineTo(obj.endPoint.X, obj.endPoint.Y);
+      if obj.time > 0 then
+      begin
+        X := obj.start.X + obj.endPoint.X;
+        Y := obj.start.Y + obj.endPoint.Y;
+        TextOut(X div 2, Y div 2, obj.time.ToString);
+      end;
     end;
 end;
 

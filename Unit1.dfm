@@ -39,6 +39,9 @@ object Form1: TForm1
       object N2: TMenuItem
         Action = checkRoot
       end
+      object inputData1: TMenuItem
+        Action = inputData
+      end
     end
     object N3: TMenuItem
       Caption = #35373#23450
@@ -62,6 +65,11 @@ object Form1: TForm1
       Category = #23455#34892
       Caption = 'checkRoot'
       OnExecute = checkRootExecute
+    end
+    object inputData: TAction
+      Category = #23455#34892
+      Caption = 'inputData'
+      OnExecute = inputDataExecute
     end
   end
 end
