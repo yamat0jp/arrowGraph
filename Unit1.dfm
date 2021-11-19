@@ -1,9 +1,10 @@
 object Form1: TForm1
   Left = 0
   Top = 0
+  BorderStyle = bsSingle
   Caption = 'Form1'
-  ClientHeight = 603
-  ClientWidth = 836
+  ClientHeight = 613
+  ClientWidth = 846
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,8 +20,8 @@ object Form1: TForm1
   object PaintBox1: TPaintBox
     Left = 0
     Top = 0
-    Width = 836
-    Height = 603
+    Width = 846
+    Height = 613
     Align = alClient
     DragCursor = crHandPoint
     OnDragOver = PaintBox1DragOver
@@ -52,6 +53,12 @@ object Form1: TForm1
         OnClick = dummyArrow1Click
       end
     end
+    object N4: TMenuItem
+      Caption = #26360#24335
+      object back1: TMenuItem
+        Action = back
+      end
+    end
   end
   object ActionList1: TActionList
     Left = 600
@@ -70,6 +77,11 @@ object Form1: TForm1
       Category = #23455#34892
       Caption = 'inputData'
       OnExecute = inputDataExecute
+    end
+    object back: TAction
+      Category = #26360#24335
+      Caption = 'back'
+      OnExecute = backExecute
     end
   end
 end

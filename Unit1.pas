@@ -44,6 +44,9 @@ type
     dummyArrow1: TMenuItem;
     inputData: TAction;
     inputData1: TMenuItem;
+    back: TAction;
+    N4: TMenuItem;
+    back1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -55,12 +58,14 @@ type
     procedure checkRootExecute(Sender: TObject);
     procedure dummyArrow1Click(Sender: TObject);
     procedure inputDataExecute(Sender: TObject);
+    procedure backExecute(Sender: TObject);
   private
     { Private êÈåæ }
     list: TList<TMyData>;
     list2: TList<TMyLine>;
+    stack: TStack<TObject>;
     active: TMyData;
-    dragitem: TObject;
+    dragitem: TMyData;
     starting, stopping: TMyData;
     dummy: Boolean;
     function checkClick(X, Y: integer): Boolean;
@@ -101,6 +106,7 @@ begin
     Exit;
   obj := TMyLine.Create;
   list2.Add(obj);
+  stack.Push(obj);
   obj.start := Point(prev.left, prev.top);
   obj.endPoint := Point(next.left, next.top);
   obj.prev := prev;
@@ -112,6 +118,37 @@ begin
   end;
   prev.next.Add(next);
   next.prev.Add(prev);
+end;
+
+procedure TForm1.backExecute(Sender: TObject);
+var
+  obj: TObject;
+  s, t: TMyData;
+  i: integer;
+begin
+  obj := stack.Pop;
+  if obj is TMyLine then
+  begin
+    list2.Delete(list2.IndexOf(obj as TMyLine));
+    obj.Free;
+  end
+  else if obj is TMyData then
+  begin
+    s := obj as TMyData;
+    list.Delete(list.IndexOf(s));
+    for t in s.prev do
+    begin
+      i := t.next.IndexOf(s);
+      t.next.Delete(i);
+    end;
+    for t in s.next do
+    begin
+      i := t.prev.IndexOf(s);
+      t.prev.Delete(i);
+    end;
+    obj.Free;
+  end;
+  PaintBox1Paint(Sender);
 end;
 
 function TForm1.checkClick(X, Y: integer): Boolean;
@@ -164,6 +201,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 begin
   list := TList<TMyData>.Create;
   list2 := TList<TMyLine>.Create;
+  stack := TStack<TObject>.Create;
   startExecute(Sender);
 end;
 
@@ -177,6 +215,7 @@ begin
   for obj in list2 do
     obj.Free;
   list2.Free;
+  stack.Free;
 end;
 
 procedure TForm1.checkRootExecute(Sender: TObject);
@@ -216,6 +255,7 @@ begin
   result.left := X;
   result.top := Y;
   list.Add(result);
+  stack.Push(result);
 end;
 
 procedure TForm1.dummyArrow1Click(Sender: TObject);
@@ -237,22 +277,20 @@ begin
       end;
     TDragState.dsDragLeave:
       begin
-        if checkClick(X, Y) = true then
+        if (checkClick(X, Y) = true) and (active <> starting) then
         begin
           if dragitem <> active then
-            with dragitem as TMyData do
-            begin
-              if list.IndexOf(active) = -1 then
-                list.Add(active);
-              addLine(dragitem as TMyData, active);
-            end;
+            if list.IndexOf(active) = -1 then
+              list.Add(active);
+          addLine(dragitem, active);
         end
-        else
+        else if (starting.left + 50 < X) and (X < stopping.left - 50) and
+          (50 < Y) and (Y < ClientHeight - 50) then
         begin
           item := createBox(X, Y);
-          addLine(dragitem as TMyData, item);
+          addLine(dragitem, item);
         end;
-        TMyData(dragitem).color := clBlack;
+        dragitem.color := clBlack;
         PaintBox1Paint(Sender);
       end;
     TDragState.dsDragMove:
@@ -292,7 +330,7 @@ begin
       TextOut(item.left + 8, item.top + 8, item.id);
     end;
   PaintBox1.Canvas.Pen.color := clBlack;
-  PaintBox1.Canvas.Font.Color:=clBlue;
+  PaintBox1.Canvas.Font.color := clBlue;
   for obj in list2 do
     with PaintBox1.Canvas do
     begin
