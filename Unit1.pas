@@ -16,6 +16,7 @@ type
     start: TPoint;
     endPoint: TPoint;
     prev, next: TMyData;
+    dash: Boolean;
   end;
 
   TMyData = class
@@ -25,7 +26,7 @@ type
     color: TColor;
     id: Char;
     data1, data2, data3: integer;
-    lines: TList<TMyLine>;
+    prev, next: TList<TMyData>;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -34,11 +35,12 @@ type
     MainMenu1: TMainMenu;
     ActionList1: TActionList;
     PaintBox1: TPaintBox;
-    Panel1: TPanel;
     start: TAction;
     checkRoot: TAction;
     N1: TMenuItem;
     N2: TMenuItem;
+    N3: TMenuItem;
+    dummyArrow1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -48,18 +50,21 @@ type
       State: TDragState; var Accept: Boolean);
     procedure startExecute(Sender: TObject);
     procedure checkRootExecute(Sender: TObject);
+    procedure dummyArrow1Click(Sender: TObject);
   private
     { Private êÈåæ }
-    function checkClick(X, Y: integer): Boolean;
-    function createBox(X, Y: integer): TMyData;
-    procedure addLine(prev, next: TMyData);
-  public
-    { Public êÈåæ }
     list: TList<TMyData>;
     list2: TList<TMyLine>;
     active: TMyData;
     dragitem: TObject;
     starting, stopping: TMyData;
+    dummy: Boolean;
+    function checkClick(X, Y: integer): Boolean;
+    function createBox(X, Y: integer): TMyData;
+    procedure addLine(prev, next: TMyData);
+    function isError: Boolean;
+  public
+    { Public êÈåæ }
   end;
 
 var
@@ -86,13 +91,21 @@ procedure TForm1.addLine(prev, next: TMyData);
 var
   obj: TMyLine;
 begin
+  if prev.next.IndexOf(next) > -1 then
+    Exit;
   obj := TMyLine.Create;
   list2.Add(obj);
   obj.start := Point(prev.left, prev.top);
   obj.endPoint := Point(next.left, next.top);
   obj.prev := prev;
   obj.next := next;
-  prev.lines.Add(obj);
+  if dummy = true then
+  begin
+    obj.dash := true;
+    dummyArrow1.Click;
+  end;
+  prev.next.Add(next);
+  next.prev.Add(prev);
 end;
 
 function TForm1.checkClick(X, Y: integer): Boolean;
@@ -110,11 +123,21 @@ begin
     end;
 end;
 
+function TForm1.isError: Boolean;
+var
+  s: TMyData;
+begin
+  result:=list2.Count=0;
+  for s in list do
+    if (s <> starting) and (s <> stopping) then
+      if (s.prev.Count = 0)or(s.next.Count = 0) then
+        result:=true;
+end;
+
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   list := TList<TMyData>.Create;
   list2 := TList<TMyLine>.Create;
-  PaintBox1.Canvas.Pen.Width := 3;
   startExecute(Sender);
 end;
 
@@ -132,34 +155,32 @@ end;
 
 procedure TForm1.checkRootExecute(Sender: TObject);
 var
-  item: TMyData;
+  item, s: TMyData;
   ls: TList<TMyData>;
   c: Char;
-  i: integer;
-  j: integer;
 begin
   c := 'A';
-  for i := 0 to list.Count - 1 do
-    list[i].id := #0;
+  for item in list do
+    item.id := #0;
   ls := TList<TMyData>.Create;
   ls.Add(starting);
   try
-    for i := 0 to list.Count - 1 do
-      while ls.Count > 0 do
-      begin
-        item := ls[0];
-        if item.id = #0 then
-        begin
-          for j := 0 to item.lines.Count - 1 do
-            ls.Add(item.lines[j].next);
-          item.id := c;
-          c := Succ(c);
-        end;
-        ls.Delete(0);
-      end;
+    while ls.Count > 0 do
+    begin
+      item := ls[0];
+      item.id := c;
+      c := Succ(c);
+      for s in item.next do
+        if (s <> stopping) and (s.id = #0) and(ls.IndexOf(s) = -1) then
+          ls.Add(s);
+      ls.Delete(0);
+    end;
   finally
     ls.Free;
   end;
+  stopping.id := c;
+  if isError = true then
+    Showmessage('error');
   PaintBox1Paint(Sender);
 end;
 
@@ -169,6 +190,11 @@ begin
   result.left := X;
   result.top := Y;
   list.Add(result);
+end;
+
+procedure TForm1.dummyArrow1Click(Sender: TObject);
+begin
+  dummy := dummyArrow1.Checked;
 end;
 
 procedure TForm1.PaintBox1DragOver(Sender, Source: TObject; X, Y: integer;
@@ -213,8 +239,11 @@ procedure TForm1.PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: integer);
 begin
   if checkClick(X, Y) = true then
-    PaintBox1.BeginDrag(true)
-  else
+  begin
+    if active <> stopping then
+      PaintBox1.BeginDrag(true);
+  end
+  else if dummy = false then
     createBox(X, Y);
   PaintBox1Paint(Sender);
 end;
@@ -239,6 +268,10 @@ begin
   for obj in list2 do
     with PaintBox1.Canvas do
     begin
+      if obj.dash = true then
+        Pen.Style := psDash
+      else
+        Pen.Style := psSolid;
       MoveTo(obj.start.X, obj.start.Y);
       LineTo(obj.endPoint.X, obj.endPoint.Y);
     end;
@@ -250,12 +283,14 @@ constructor TMyData.Create;
 begin
   Length := 33;
   color := clBlack;
-  lines := TList<TMyLine>.Create;
+  prev := TList<TMyData>.Create;
+  next := TList<TMyData>.Create;
 end;
 
 destructor TMyData.Destroy;
 begin
-  lines.Free;
+  prev.Free;
+  next.Free;
   inherited;
 end;
 
