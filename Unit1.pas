@@ -329,8 +329,11 @@ begin
     while ls.Count > 0 do
     begin
       item := ls[0];
-      item.id := c;
-      c := Succ(c);
+      if item.id = #0 then
+      begin
+        item.id := c;
+        c := Succ(c);
+      end;
       for s in item.next do
         if (s <> stopping) and (ls.IndexOf(s) = -1) then
           ls.Add(s);
@@ -375,7 +378,7 @@ procedure TForm1.execAppExecute(Sender: TObject);
 begin
   if list2.Count = 0 then
     Exit;
-  complete:=false;
+  complete := false;
   checkRootExecute(Sender);
   if complete = true then
     inputDataExecute(Sender);
@@ -440,7 +443,7 @@ begin
   with PaintBox1.Canvas do
   begin
     FillRect(ClientRect);
-    Pen.Color:=clBlack;
+    Pen.color := clBlack;
   end;
   for item in list do
     with PaintBox1.Canvas do
