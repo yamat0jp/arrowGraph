@@ -319,10 +319,8 @@ var
   item, s: TMyData;
   ls: TList<TMyData>;
   c: Char;
-  bool: Boolean;
 begin
   c := 'A';
-  bool := false;
   for item in list do
     item.id := #0;
   ls := TList<TMyData>.Create;
@@ -335,21 +333,14 @@ begin
       c := Succ(c);
       for s in item.next do
         if (s <> stopping) and (ls.IndexOf(s) = -1) then
-        begin
-          if (s.id <> #0) and (isDummy(item, s) = false) then
-          begin
-            bool := true;
-            break;
-          end;
           ls.Add(s);
-        end;
       ls.Delete(0);
     end;
   finally
     ls.Free;
   end;
   stopping.id := c;
-  complete := not(bool = true) or (isError = true);
+  complete := not isError;
 end;
 
 procedure TForm1.clearExecute(Sender: TObject);
@@ -382,6 +373,8 @@ end;
 
 procedure TForm1.execAppExecute(Sender: TObject);
 begin
+  if list2.Count = 0 then
+    Exit;
   complete:=false;
   checkRootExecute(Sender);
   if complete = true then
