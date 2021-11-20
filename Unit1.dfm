@@ -67,6 +67,9 @@ object Form1: TForm1
       object back1: TMenuItem
         Action = back
       end
+      object clear1: TMenuItem
+        Action = clear
+      end
     end
   end
   object ActionList1: TActionList
@@ -101,6 +104,11 @@ object Form1: TForm1
       Category = #23455#34892
       Caption = 'execApp'
       OnExecute = execAppExecute
+    end
+    object clear: TAction
+      Category = #26360#24335
+      Caption = 'clear'
+      OnExecute = clearExecute
     end
   end
 end

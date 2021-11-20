@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, System.Actions, Vcl.ActnList, Vcl.Menus,
-  Vcl.ExtCtrls, System.Generics.Collections, System.Types;
+  Vcl.ExtCtrls, System.Generics.Collections, System.Types, System.UITypes;
 
 type
   TMyData = class;
@@ -53,6 +53,8 @@ type
     calcurate2: TMenuItem;
     N5: TMenuItem;
     execApp1: TMenuItem;
+    clear: TAction;
+    clear1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -67,6 +69,7 @@ type
     procedure backExecute(Sender: TObject);
     procedure calcurateExecute(Sender: TObject);
     procedure execAppExecute(Sender: TObject);
+    procedure clearExecute(Sender: TObject);
   private
     { Private êÈåæ }
     list: TList<TMyData>;
@@ -138,7 +141,7 @@ procedure TForm1.addLine(prev, next: TMyData);
 var
   obj: TMyLine;
 begin
-  if (prev.next.IndexOf(next) > -1)or(next.prev.IndexOf(prev) > -1) then
+  if (prev.next.IndexOf(next) > -1) or (next.prev.IndexOf(prev) > -1) then
     Exit;
   if (dummy = true) and ((prev = starting) or (next = stopping)) then
     Exit;
@@ -239,7 +242,7 @@ var
   s: string;
   i: integer;
 begin
-  OKRightDlg.ValueListEditor1.Strings.Clear;
+  OKRightDlg.ValueListEditor1.Strings.clear;
   for obj in list2 do
     if obj.dash = false then
     begin
@@ -300,6 +303,7 @@ var
   item, s: TMyData;
   ls: TList<TMyData>;
   c: Char;
+  bool: Boolean;
 begin
   c := 'A';
   for item in list do
@@ -307,23 +311,44 @@ begin
   ls := TList<TMyData>.Create;
   ls.Add(starting);
   try
-    while ls.Count > 0 do
+    while (ls.Count > 0)and(bool = false) do
     begin
       item := ls[0];
       item.id := c;
       c := Succ(c);
       for s in item.next do
-        if (s <> stopping) and (s.id = #0) and (ls.IndexOf(s) = -1) then
+        if (s <> stopping) and (ls.IndexOf(s) = -1) then
+        begin
+          if s.id <> #0 then
+          begin
+            bool:=true;
+            break;
+          end;
           ls.Add(s);
+        end;
       ls.Delete(0);
     end;
   finally
     ls.Free;
   end;
   stopping.id := c;
-  if isError = true then
+  if (bool = true)or(isError = true) then
     Showmessage('error');
   PaintBox1Paint(Sender);
+end;
+
+procedure TForm1.clearExecute(Sender: TObject);
+var
+  obj: TObject;
+begin
+  for obj in list do
+    obj.Free;
+  for obj in list2 do
+    obj.Free;
+  list.Clear;
+  list2.Clear;
+  stack.clear;
+  startExecute(Sender);
 end;
 
 function TForm1.createBox(X, Y: integer): TMyData;
@@ -396,6 +421,7 @@ var
   obj: TMyLine;
   item: TMyData;
   X, Y: integer;
+  color: TColor;
 begin
   Canvas.FillRect(ClientRect);
   for item in list do
@@ -415,7 +441,11 @@ begin
         Font.color := clRed;
       TextOut(X, Y + 75, string.Format('(%d)', [item.data3]));
     end;
-  PaintBox1.Canvas.Font.color := clBlue;
+  with PaintBox1.Canvas do
+  begin
+    Font.color := clBlue;
+    color := Brush.color;
+  end;
   for obj in list2 do
     with PaintBox1.Canvas do
     begin
@@ -429,7 +459,12 @@ begin
       else
         Pen.color := clBlack;
       MoveTo(obj.start.X, obj.start.Y);
-      LineTo(obj.endPoint.X, obj.endPoint.Y);
+      X := obj.endPoint.X;
+      Y := obj.endPoint.Y;
+      LineTo(X, Y);
+      Brush.color := clBlack;
+      RectAngle(X - 3, Y - 3, X + 3, Y + 3);
+      Brush.color := color;
       if obj.time <> -1 then
       begin
         X := obj.start.X + obj.endPoint.X;
