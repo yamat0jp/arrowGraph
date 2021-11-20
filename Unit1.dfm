@@ -37,18 +37,6 @@ object Form1: TForm1
     Top = 232
     object N1: TMenuItem
       Caption = #23455#34892
-      object N2: TMenuItem
-        Action = checkRoot
-      end
-      object inputData1: TMenuItem
-        Action = inputData
-      end
-      object calcurate2: TMenuItem
-        Action = calcurate
-      end
-      object N5: TMenuItem
-        Caption = '-'
-      end
       object execApp1: TMenuItem
         Action = execApp
       end

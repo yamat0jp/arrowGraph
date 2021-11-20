@@ -40,7 +40,6 @@ type
     start: TAction;
     checkRoot: TAction;
     N1: TMenuItem;
-    N2: TMenuItem;
     N3: TMenuItem;
     dummyArrow1: TMenuItem;
     inputData: TAction;
@@ -49,9 +48,6 @@ type
     back1: TMenuItem;
     calcurate: TAction;
     execApp: TAction;
-    inputData1: TMenuItem;
-    calcurate2: TMenuItem;
-    N5: TMenuItem;
     execApp1: TMenuItem;
     clear: TAction;
     clear1: TMenuItem;
@@ -86,6 +82,8 @@ type
     function isError: Boolean;
     function getTime(prev, next: TMyData): integer;
     procedure setTime(obj: TMyData; reverse: Boolean);
+    function isDummy(prev, next: TMyData): Boolean;
+    function isCritical(line: TMyLine): Boolean;
   public
     { Public êÈåæ }
   end;
@@ -160,6 +158,7 @@ begin
   end;
   prev.next.Add(next);
   next.prev.Add(prev);
+  checkRootExecute(nil);
 end;
 
 procedure TForm1.backExecute(Sender: TObject);
@@ -217,8 +216,7 @@ begin
   setTime(stopping, true);
   for s in list do
     s.data3 := s.data2 - s.data1;
-  complete := true;
-  PaintBox1Paint(Sender);
+  complete := starting.data3 = 0;
 end;
 
 function TForm1.checkClick(X, Y: integer): Boolean;
@@ -253,7 +251,25 @@ begin
     with OKRightDlg.ValueListEditor1.Strings do
       for i := 0 to Count - 1 do
         TMyLine(Objects[i]).time := ValueFromIndex[i].ToInteger;
-  PaintBox1Paint(Sender);
+end;
+
+function TForm1.isCritical(line: TMyLine): Boolean;
+begin
+  if (line.prev.data3 = 0) and (line.next.data3 = 0) and
+    (line.time = line.next.data2 - line.prev.data2) then
+    result := true
+  else
+    result := false;
+end;
+
+function TForm1.isDummy(prev, next: TMyData): Boolean;
+var
+  obj: TMyLine;
+begin
+  result := false;
+  for obj in list2 do
+    if (obj.prev = prev) and (obj.next = next) and (obj.dash = true) then
+      result := true;
 end;
 
 function TForm1.isError: Boolean;
@@ -306,12 +322,13 @@ var
   bool: Boolean;
 begin
   c := 'A';
+  bool := false;
   for item in list do
     item.id := #0;
   ls := TList<TMyData>.Create;
   ls.Add(starting);
   try
-    while (ls.Count > 0)and(bool = false) do
+    while (ls.Count > 0) or (bool = true) do
     begin
       item := ls[0];
       item.id := c;
@@ -319,9 +336,9 @@ begin
       for s in item.next do
         if (s <> stopping) and (ls.IndexOf(s) = -1) then
         begin
-          if s.id <> #0 then
+          if (s.id <> #0) and (isDummy(item, s) = false) then
           begin
-            bool:=true;
+            bool := true;
             break;
           end;
           ls.Add(s);
@@ -332,9 +349,7 @@ begin
     ls.Free;
   end;
   stopping.id := c;
-  if (bool = true)or(isError = true) then
-    Showmessage('error');
-  PaintBox1Paint(Sender);
+  complete := not(bool = true) or (isError = true);
 end;
 
 procedure TForm1.clearExecute(Sender: TObject);
@@ -345,8 +360,8 @@ begin
     obj.Free;
   for obj in list2 do
     obj.Free;
-  list.Clear;
-  list2.Clear;
+  list.clear;
+  list2.clear;
   stack.clear;
   startExecute(Sender);
 end;
@@ -368,8 +383,13 @@ end;
 procedure TForm1.execAppExecute(Sender: TObject);
 begin
   checkRootExecute(Sender);
-  inputDataExecute(Sender);
-  calcurateExecute(Sender);
+  if complete = true then
+    inputDataExecute(Sender);
+  if complete = true then
+    calcurateExecute(Sender)
+  else
+    Showmessage('error');
+  PaintBox1Paint(Sender);
 end;
 
 procedure TForm1.PaintBox1DragOver(Sender, Source: TObject; X, Y: integer;
@@ -453,8 +473,7 @@ begin
         Pen.Style := psDash
       else
         Pen.Style := psSolid;
-      if (complete = true) and (obj.prev.data3 = 0) and (obj.next.data3 = 0)
-      then
+      if (complete = true) and (isCritical(obj) = true) then
         Pen.color := clRed
       else
         Pen.color := clBlack;

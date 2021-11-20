@@ -46,7 +46,7 @@ end;
 
 procedure TOKRightDlg.FormShow(Sender: TObject);
 var
-  i, j: Integer;
+  i: Integer;
   s, t: string;
 begin
   for i := 0 to list.Count - 1 do
