@@ -9,6 +9,10 @@ object OKRightDlg: TOKRightDlg
   ParentFont = True
   OldCreateOrder = True
   Position = poScreenCenter
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnHide = FormHide
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
