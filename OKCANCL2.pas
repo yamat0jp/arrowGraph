@@ -59,6 +59,7 @@ begin
   list.Assign(ValueListEditor1.Strings);
   list.Sort;
   ValueListEditor1.Strings.Assign(list);
+  ValueListEditor1.SetFocus;
 end;
 
 end.

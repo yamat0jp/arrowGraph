@@ -382,6 +382,7 @@ end;
 
 procedure TForm1.execAppExecute(Sender: TObject);
 begin
+  complete:=false;
   checkRootExecute(Sender);
   if complete = true then
     inputDataExecute(Sender);
@@ -443,7 +444,11 @@ var
   X, Y: integer;
   color: TColor;
 begin
-  Canvas.FillRect(ClientRect);
+  with PaintBox1.Canvas do
+  begin
+    FillRect(ClientRect);
+    Pen.Color:=clBlack;
+  end;
   for item in list do
     with PaintBox1.Canvas do
     begin
