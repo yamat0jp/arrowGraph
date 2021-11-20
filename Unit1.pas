@@ -328,7 +328,7 @@ begin
   ls := TList<TMyData>.Create;
   ls.Add(starting);
   try
-    while (ls.Count > 0) or (bool = true) do
+    while ls.Count > 0 do
     begin
       item := ls[0];
       item.id := c;

@@ -56,6 +56,9 @@ begin
     if ValueListEditor1.Strings.IndexOf(s + '=') > -1 then
       ValueListEditor1.Values[s] := t;
   end;
+  list.Assign(ValueListEditor1.Strings);
+  list.Sort;
+  ValueListEditor1.Strings.Assign(list);
 end;
 
 end.
