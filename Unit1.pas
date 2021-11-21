@@ -446,11 +446,14 @@ begin
       X := item.left + 8;
       Y := item.top + 8;
       TextOut(X, Y, item.id);
-      TextOut(X, Y + 25, item.data1.ToString);
-      TextOut(X, Y + 50, item.data2.ToString);
-      if item.data3 = 0 then
-        Font.color := clRed;
-      TextOut(X, Y + 75, string.Format('(%d)', [item.data3]));
+      if complete = true then
+      begin
+        TextOut(X, Y + 25, item.data1.ToString);
+        TextOut(X, Y + 50, item.data2.ToString);
+        if item.data3 = 0 then
+          Font.color := clRed;
+        TextOut(X, Y + 75, string.Format('(%d)', [item.data3]));
+      end;
     end;
   with PaintBox1.Canvas do
   begin
