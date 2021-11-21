@@ -82,7 +82,6 @@ type
     function isError: Boolean;
     function getTime(prev, next: TMyData): integer;
     procedure setTime(obj: TMyData; reverse: Boolean);
-    function isDummy(prev, next: TMyData): Boolean;
     function isCritical(line: TMyLine): Boolean;
   public
     { Public êÈåæ }
@@ -159,6 +158,7 @@ begin
   prev.next.Add(next);
   next.prev.Add(prev);
   checkRootExecute(nil);
+  complete := false;
 end;
 
 procedure TForm1.backExecute(Sender: TObject);
@@ -260,16 +260,6 @@ begin
     result := true
   else
     result := false;
-end;
-
-function TForm1.isDummy(prev, next: TMyData): Boolean;
-var
-  obj: TMyLine;
-begin
-  result := false;
-  for obj in list2 do
-    if (obj.prev = prev) and (obj.next = next) and (obj.dash = true) then
-      result := true;
 end;
 
 function TForm1.isError: Boolean;
