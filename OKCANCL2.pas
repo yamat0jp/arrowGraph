@@ -48,12 +48,17 @@ procedure TOKRightDlg.FormShow(Sender: TObject);
 var
   i, j: Integer;
   obj: TObject;
+  s: string;
 begin
   for i := 0 to list.Count - 1 do
   begin
     obj := list.Objects[i];
     j := ValueListEditor1.Strings.IndexOfObject(obj);
-    ValueListEditor1.Strings[j] := list[i];
+    if j > -1 then
+    begin
+      s := ValueListEditor1.Keys[j + 1];
+      ValueListEditor1.Values[s] := list.ValueFromIndex[i];
+    end;
   end;
   list.Assign(ValueListEditor1.Strings);
   list.Sort;

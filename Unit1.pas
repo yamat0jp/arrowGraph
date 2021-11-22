@@ -168,6 +168,8 @@ var
   line: TMyLine;
   i: integer;
 begin
+  if stack.Count = 0 then
+    Exit;
   obj := stack.Pop;
   if obj is TMyLine then
   begin
