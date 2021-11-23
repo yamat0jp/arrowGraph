@@ -40,8 +40,12 @@ begin
 end;
 
 procedure TOKRightDlg.FormHide(Sender: TObject);
+var
+  i: Integer;
 begin
   list.Assign(ValueListEditor1.Strings);
+  for i := 0 to list.Count-1 do
+    list.Objects[i]:=nil;
 end;
 
 procedure TOKRightDlg.FormShow(Sender: TObject);

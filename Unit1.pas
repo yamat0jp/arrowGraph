@@ -127,6 +127,7 @@ end;
 
 procedure TForm1.startExecute(Sender: TObject);
 begin
+  complete := false;
   starting := TMyData.Create;
   starting.left := PaintBox1.left + 10;
   starting.top := PaintBox1.Height div 2;
@@ -210,6 +211,7 @@ begin
     end;
     obj.Free;
   end;
+  complete := false;
   PaintBox1Paint(Sender);
 end;
 
