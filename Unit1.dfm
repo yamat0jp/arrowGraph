@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   BorderStyle = bsSingle
-  Caption = 'Form1'
+  Caption = 'arrowSoft'
   ClientHeight = 613
   ClientWidth = 846
   Color = clMoneyGreen
@@ -59,6 +59,12 @@ object Form1: TForm1
         Action = clear
       end
     end
+    object N2: TMenuItem
+      Caption = #12504#12523#12503
+      object about1: TMenuItem
+        Action = about
+      end
+    end
   end
   object ActionList1: TActionList
     Left = 600
@@ -97,6 +103,11 @@ object Form1: TForm1
       Category = #26360#24335
       Caption = 'clear'
       OnExecute = clearExecute
+    end
+    object about: TAction
+      Category = #12504#12523#12503
+      Caption = 'about'
+      OnExecute = aboutExecute
     end
   end
 end

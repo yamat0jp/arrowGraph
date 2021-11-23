@@ -51,6 +51,9 @@ type
     execApp1: TMenuItem;
     clear: TAction;
     clear1: TMenuItem;
+    about: TAction;
+    N2: TMenuItem;
+    about1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -66,6 +69,7 @@ type
     procedure calcurateExecute(Sender: TObject);
     procedure execAppExecute(Sender: TObject);
     procedure clearExecute(Sender: TObject);
+    procedure aboutExecute(Sender: TObject);
   private
     { Private êÈåæ }
     list: TList<TMyData>;
@@ -94,7 +98,7 @@ implementation
 
 {$R *.dfm}
 
-uses OKCANCL2;
+uses OKCANCL2, about;
 
 procedure TForm1.setTime(obj: TMyData; reverse: Boolean);
 var
@@ -132,6 +136,13 @@ begin
   stopping.top := PaintBox1.Height div 2;
   list.Add(stopping);
   PaintBox1Paint(Sender);
+end;
+
+procedure TForm1.aboutExecute(Sender: TObject);
+begin
+  AboutBox.left := left + 100;
+  AboutBox.top := top + 50;
+  AboutBox.ShowModal;
 end;
 
 procedure TForm1.addLine(prev, next: TMyData);
