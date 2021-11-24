@@ -54,6 +54,8 @@ type
     about: TAction;
     N2: TMenuItem;
     about1: TMenuItem;
+    N5: TMenuItem;
+    quit1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -70,6 +72,7 @@ type
     procedure execAppExecute(Sender: TObject);
     procedure clearExecute(Sender: TObject);
     procedure aboutExecute(Sender: TObject);
+    procedure quit1Click(Sender: TObject);
   private
     { Private êÈåæ }
     list: TList<TMyData>;
@@ -537,6 +540,11 @@ begin
         TextOut(X div 2, Y div 2, obj.time.ToString);
       end;
     end;
+end;
+
+procedure TForm1.quit1Click(Sender: TObject);
+begin
+  Close;
 end;
 
 { TMyData }

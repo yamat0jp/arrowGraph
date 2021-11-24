@@ -40,6 +40,13 @@ object Form1: TForm1
       object execApp1: TMenuItem
         Action = execApp
       end
+      object N5: TMenuItem
+        Caption = '-'
+      end
+      object quit1: TMenuItem
+        Caption = 'quit'
+        OnClick = quit1Click
+      end
     end
     object N3: TMenuItem
       Caption = #35373#23450
