@@ -80,6 +80,7 @@ type
     starting, stopping: TMyData;
     dummy: Boolean;
     complete: Boolean;
+    roop: TMyData;
     function checkClick(X, Y: integer): Boolean;
     function createBox(X, Y: integer): TMyData;
     procedure addLine(prev, next: TMyData);
@@ -87,6 +88,8 @@ type
     function getTime(prev, next: TMyData): integer;
     procedure setTime(obj: TMyData; reverse: Boolean);
     function isCritical(line: TMyLine): Boolean;
+    function isLoopDouble(prev, next: TMyData): Boolean;
+    function isLoop(item: TMyData): Boolean;
   public
     { Public éŒ¾ }
   end;
@@ -150,7 +153,7 @@ procedure TForm1.addLine(prev, next: TMyData);
 var
   obj: TMyLine;
 begin
-  if (prev.next.IndexOf(next) > -1) or (next.prev.IndexOf(prev) > -1) then
+  if isLoopDouble(prev, next) = true then
     Exit;
   if (dummy = true) and ((prev = starting) or (next = stopping)) then
     Exit;
@@ -286,6 +289,40 @@ begin
     if (s <> starting) and (s <> stopping) then
       if (s.prev.Count = 0) or (s.next.Count = 0) then
         result := true;
+end;
+
+function TForm1.isLoop(item: TMyData): Boolean;
+var
+  temp: TMyData;
+begin
+  result := false;
+  if item.next.Count = 0 then
+    Exit
+  else if item.next.IndexOf(roop) > -1 then
+  begin
+    result := true;
+    Exit;
+  end
+  else
+    for temp in item.next do
+      if isLoop(temp) = true then
+      begin
+        result := true;
+        break;
+      end;
+end;
+
+function TForm1.isLoopDouble(prev, next: TMyData): Boolean;
+var
+  item: TMyLine;
+begin
+  result := false;
+  for item in list2 do
+    if (prev = item.prev) and (next = item.next) then
+      result := true;
+  roop := prev;
+  if isLoop(next) = true then
+    result := true;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
