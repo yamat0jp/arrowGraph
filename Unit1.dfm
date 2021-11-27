@@ -65,6 +65,14 @@ object Form1: TForm1
       object clear1: TMenuItem
         Action = clear
       end
+      object N6: TMenuItem
+        Caption = '-'
+      end
+      object showgrid1: TMenuItem
+        AutoCheck = True
+        Caption = 'showgrid'
+        OnClick = showgrid1Click
+      end
     end
     object N2: TMenuItem
       Caption = #12504#12523#12503

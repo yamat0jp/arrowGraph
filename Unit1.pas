@@ -56,6 +56,8 @@ type
     about1: TMenuItem;
     N5: TMenuItem;
     quit1: TMenuItem;
+    N6: TMenuItem;
+    showgrid1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -73,6 +75,7 @@ type
     procedure clearExecute(Sender: TObject);
     procedure aboutExecute(Sender: TObject);
     procedure quit1Click(Sender: TObject);
+    procedure showgrid1Click(Sender: TObject);
   private
     { Private êÈåæ }
     list: TList<TMyData>;
@@ -84,6 +87,7 @@ type
     dummy: Boolean;
     complete: Boolean;
     roop: TMyData;
+    hasgrid: Boolean;
     function checkClick(X, Y: integer): Boolean;
     function createBox(X, Y: integer): TMyData;
     procedure addLine(prev, next: TMyData);
@@ -93,6 +97,7 @@ type
     function isCritical(line: TMyLine): Boolean;
     function isLoopDouble(prev, next: TMyData): Boolean;
     function isLoop(item: TMyData): Boolean;
+    procedure drawGrid;
   public
     { Public êÈåæ }
   end;
@@ -129,6 +134,12 @@ begin
       if starting <> s then
         setTime(s, reverse);
     end;
+end;
+
+procedure TForm1.showgrid1Click(Sender: TObject);
+begin
+  hasgrid:=showgrid1.Checked;
+  PaintBox1Paint(Sender);
 end;
 
 procedure TForm1.startExecute(Sender: TObject);
@@ -414,6 +425,33 @@ begin
   stack.Push(result);
 end;
 
+procedure TForm1.drawGrid;
+var
+  i, j: integer;
+  X, Y: integer;
+begin
+  X := starting.left;
+  Y := starting.top mod 33;
+  with PaintBox1.Canvas do
+  begin
+    Pen.Color:=clBlack;
+    for i := 0 to ClientWidth div 33 do
+    begin
+      MoveTo(X + i * 33, Y);
+      LineTo(X + i * 33, Y + ClientHeight);
+    end;
+    for i := 0 to ClientHeight div 33 do
+    begin
+      MoveTo(X, Y + i * 33);
+      LineTo(X + ClientWidth, Y + i * 33);
+    end;
+    for i := 0 to ClientWidth div 33 do
+      for j := 0 to ClientHeight div 33 do
+        FillRect(Rect(X + i * 33 - 1, Y + j * 33 - 1, X + i * 33 + 1,
+          Y + j * 33 + 1));
+  end;
+end;
+
 procedure TForm1.dummyArrow1Click(Sender: TObject);
 begin
   dummy := dummyArrow1.Checked;
@@ -488,6 +526,8 @@ begin
   with PaintBox1.Canvas do
   begin
     FillRect(ClientRect);
+    if hasgrid = true then
+      drawGrid;
     Pen.color := clBlack;
   end;
   for item in list do
