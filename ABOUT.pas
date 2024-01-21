@@ -12,7 +12,6 @@ type
     ProductName: TLabel;
     Version: TLabel;
     Copyright: TLabel;
-    Comments: TLabel;
     OKButton: TButton;
   private
     { Private 宣言 }

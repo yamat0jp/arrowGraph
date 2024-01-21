@@ -11,9 +11,7 @@ object AboutBox: TAboutBox
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = True
   Position = poDesigned
-  PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
     Left = 8
@@ -76,15 +74,6 @@ object AboutBox: TAboutBox
       Width = 57
       Height = 13
       Caption = 'OSS project'
-      IsControl = True
-    end
-    object Comments: TLabel
-      Left = 8
-      Top = 104
-      Width = 141
-      Height = 39
-      Caption = #12467#12513#12531#12488' http://sound.jp/kainushi https://pybbs.herokuapp.com'
-      WordWrap = True
       IsControl = True
     end
   end
